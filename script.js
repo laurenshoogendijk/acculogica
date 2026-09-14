@@ -11,7 +11,6 @@ const CONFIG = {
     // Accucapaciteit en limieten (%)
     minSoc: 12,                      // % minimale accucapaciteit (ondergrens)
     maxSoc: 100,                     // % maximale accucapaciteit (bovengrens)
-    socBuffer: 20,                   // % reserve voor de absolute piekuren
 
     // Besturing & Snelheid
     deadband: 15,                    // W, negeer kleine vermogensschommelingen
