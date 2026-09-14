@@ -11,7 +11,6 @@ const CONFIG = {
     // Accucapaciteit en limieten (%)
     minSoc: 12,                      // % minimale accucapaciteit (ondergrens)
     maxSoc: 100,                     // % maximale accucapaciteit (bovengrens)
-
     // Besturing & Snelheid
     deadband: 15,                    // W, negeer kleine vermogensschommelingen
     rampUpStap: 350,                 // W per cyclus voor geleidelijke vermogensopbouw
@@ -117,7 +116,8 @@ if (forceerLaden && soc < CONFIG.forceerLadenMaxSoc) {
 
     // B. Hoogste uur van de dag: Maximaal ontladen naar het net als de spread groot genoeg is
     } else if (
-        huidigePrijs === hoogstePrijs &&
+        huidigePrijs >= (hoogstePrijs - 0.03) && // Prijs zit maximaal €0,03 onder de dagtop
+        // huidigePrijs === hoogstePrijs && // Prijs is hoogste van de dag
         prijsVerschil >= CONFIG.minPrijsSpreadOntladen &&
         soc > CONFIG.minSocPrijsOntladen
     ) {
