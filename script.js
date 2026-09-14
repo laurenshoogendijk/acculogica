@@ -11,14 +11,14 @@ const CONFIG = {
     // Accucapaciteit en limieten (%)
     minSoc: 12,                      // % minimale accucapaciteit (ondergrens)
     maxSoc: 100,                     // % maximale accucapaciteit (bovengrens)
-    socBuffer: 20,                   // % reserve voor dure uren (beschermt acculading)
+    socBuffer: 20,                   // % reserve voor de absolute piekuren
 
     // Besturing & Snelheid
     deadband: 15,                    // W, negeer kleine vermogensschommelingen
     rampUpStap: 350,                 // W per cyclus voor geleidelijke vermogensopbouw
 
     // Zonne-energie
-    ladenOpPvOverschot: true,       // true = PV-overschot opslaan in accu
+    ladenOpPvOverschot: true,        // true = PV-overschot opslaan in accu
 
     // Handmatig forceren
     forceerLadenMaxSoc: 90,          // Stop geforceerd laden boven dit SOC %
@@ -101,7 +101,7 @@ if (forceerLaden && soc < CONFIG.forceerLadenMaxSoc) {
     doelSetpoint = CONFIG.maxOntlaadVermogen;
     reden = "Handmatig ontladen geforceerd";
 
-// ─── 3. Dynamische Prijssturing (Arbitrage) ─────────────────────────
+// ─── 3. Dynamische Prijssturing (Arbitrage) ──────────────────────────────────
 } else if (CONFIG.prijsSturingActief) {
 
     // A. Negatieve prijzen: Maak optimaal gebruik van geld toe krijgen op stroom opname
@@ -147,12 +147,11 @@ if (forceerLaden && soc < CONFIG.forceerLadenMaxSoc) {
 
 // ─── 4. Rendementscontroles & Accubescherming ────────────────────────────────
 
-// Ontladen blokkeren als de acculading onder de buffer komt en de prijs niet boven break-even ligt
-if (doelSetpoint > 0 && soc <= CONFIG.socBuffer) {
-    if (huidigePrijs < breakEvenOntlaadPrijs) {
-        doelSetpoint = 0;
-        reden = `Bufferbescherming (${CONFIG.socBuffer}% SOC): prijs €${huidigePrijs.toFixed(3)} onder break-even €${breakEvenOntlaadPrijs.toFixed(3)}`;
-    }
+// Blokkeer ontladen als de netprijs lager is dan de break-even ontlaadprijs van de accu.
+// Het is op dat moment goedkoper om stroom direct van het net te kopen dan de accu aan te spreken.
+if (doelSetpoint > 0 && huidigePrijs < breakEvenOntlaadPrijs) {
+    doelSetpoint = 0;
+    reden = `Ontladen geblokkeerd: netprijs (€${huidigePrijs.toFixed(3)}) is goedkoper dan accustroom (break-even €${breakEvenOntlaadPrijs.toFixed(3)})`;
 }
 
 // Kleine vermogens negeren i.v.m. omvormer-efficiëntieverliezen
