@@ -1,249 +1,224 @@
 // ─── Configuratie ────────────────────────────────────────────────────────────
 const CONFIG = {
     deviceId: "31c393bc5ba6bd424490fb39a18c9a72",
-    maxCharge: -2500,       // W, negatief = laden
-    maxDischarge: 1250,     // W, positief = ontladen
 
-    PVLaden: true,         // true = laden op PV-overschot, false = terugleveren
+    // Vermogensgrenzen (Watt)
+    maxLaadVermogen: -2500,          // W (negatief = laden uit het net/PV)
+    maxOntlaadVermogen: 1250,        // W (positief = ontladen naar huis/net)
+    minLaadVermogenDrempel: -100,    // W, negeer te kleine laadacties i.v.m. rendement
+    minOntlaadVermogenDrempel: 50,   // W, negeer te kleine ontlaadacties
 
-    maxSOC: 100,
-    minSOC: 12,
-    deadband: 15,           // W, geen actie als verschil kleiner dan dit
-    rampUp: 350,            // Setpoint verhogen/verlagen in stappen van rampUp Watt
+    // Accucapaciteit en limieten (%)
+    minSoc: 12,                      // % minimale accucapaciteit (ondergrens)
+    maxSoc: 100,                     // % maximale accucapaciteit (bovengrens)
+    socBuffer: 20,                   // % reserve voor dure uren (beschermt acculading)
+
+    // Besturing & Snelheid
+    deadband: 15,                    // W, negeer kleine vermogensschommelingen
+    rampUpStap: 350,                 // W per cyclus voor geleidelijke vermogensopbouw
+
+    // Zonne-energie
+    ladenOpPvOverschot: true,       // true = PV-overschot opslaan in accu
 
     // Handmatig forceren
-    forceChargeMaxCharge: 90,   // Stop geforceerd laden boven dit SoC %
-    forceDischargeMinSoc: 25,   // Stop geforceerd ontladen onder dit SoC %
+    forceerLadenMaxSoc: 90,          // Stop geforceerd laden boven dit SOC %
+    forceerOntladenMinSoc: 25,       // Stop geforceerd ontladen onder dit SOC %
 
-    // Prijssturing: laden
-    prijsLaden: false,
-    prijsLadenVerschil: 0.030,          // Max toeslag boven laagstePrijs om nog te laden
-    prijsLadenVerschilVermogen: -1750,  // Laadvermogen bij prijsgestuurde lading
-    prijsLadenMinVerschil: 0.11,        // Minimale dag-spread om op goedkoopste uur te laden
-    prijsLadenMinSOC: 95,               // Hysterese: start laden onder dit SoC
-    prijsLadenMaxCharge: 98,            // stop hysterese-laden boven dit SoC
+    // Dynamische Prijssturing (Arbitrage)
+    prijsSturingActief: true,        // Activeer slim laden/ontladen op dynamische uurprijzen
+    minPrijsSpreadOntladen: 0.12,    // €/kWh minimale dagspread voor piek-ontladen naar net
+    minPrijsSpreadLaden: 0.08,       // €/kWh minimale dagspread om netladen te activeren
+    prijsLadenVerschil: 0.04,        // €/kWh boven laagste prijs om nog bij te laden
+    minSocPrijsOntladen: 60,         // % minimale SOC vereist om te ontladen naar net op piekuur
 
-    minSocPrijsOntladen: 70,
+    // Rendement & Slijtage
+    accuEfficiency: 0.85,            // RTE(Roundtrip efficiency) (bijv. 85%)
+    degradatieKosten: 0.02,          // €/kWh slijtagekosten per kWh
 
-    // Prijssturing: ontladen
-    minSpreadOntladen: 0.30,    // Minimale dag-spread om automatisch op hoogstePrijs te ontladen
-    accuEfficiency: 0.80,       // Roundtrip-efficiency voor drempelberekening
-
-    // Negatieve prijzen: laadvermogen per afstandsband (€/kWh verschil tov laagste)
-    negPrijsBanden: [
-        { maxVerschil: 0.05, vermogen: -2000 },
-        { maxVerschil: 0.10, vermogen: -1500 },
-        { maxVerschil: 0.25, vermogen: -1100 },
-        { maxVerschil: 0.30, vermogen: -900 },
-        { maxVerschil: Infinity, vermogen: -800 },
-    ],
-
-    socBuffer: 20   // Reserveer accucapaciteit voor de dure uren (ontladen wordt geblokkeerd onder dit SoC als prijs te laag is)
+    // Negatieve prijsbanden (€/kWh verschil t.o.v. de absolute laagste dagprijs)
+    negatievePrijsBanden: [
+        { maxVerschil: 0.05, vermogen: -2500 },
+        { maxVerschil: 0.10, vermogen: -2000 },
+        { maxVerschil: 0.25, vermogen: -1500 },
+        { maxVerschil: Infinity, vermogen: -1000 }
+    ]
 };
 // ─────────────────────────────────────────────────────────────────────────────
 
-const d = msg.data;
+const inputData = msg.data;
 
-const p1 = Number((d.p1c * 1000) - (d.p1p * 1000)); // Netvermogen (+ = afname, - = teruglevering)
-const accu = -Number(d.accu);                           // Accuvermogen (+ = ontladen, - = laden)
-const pv = Number(d.pv);                              // PV-vermogen (W)
-
-const soc = Number(d.soc);       // Accu SoC (%)
-const nopdemeter = Number(d.target);    // Doelvermogen op de meter
-
-const huidigePrijs = Number(d.prijs);          // Huidige dynamische prijs (€/kWh)
-const laagstePrijs = Number(d.laagsteprijs);   // Laagste prijs vandaag
-const hoogstePrijs = Number(d.hoogsteprijs);   // Hoogste prijs vandaag
-const forceerLaden = d.force_charge === "on";
-const forceerOntladen = d.force_discharge === "on";
-
-// ─── Afgeleide prijsgrootheden ────────────────────────────────────────────────
-const prijsVerschil = hoogstePrijs - laagstePrijs;
-
-// FIX: efficiency wordt één keer toegepast op het netto prijsverschil
-// Drempel = break-even prijs waarbij ontladen rendabel is na roundtrip-verlies
-const prijsHoogteOntladen = laagstePrijs + (prijsVerschil * CONFIG.accuEfficiency);
-const prijsHoogteOntladen2 = laagstePrijs + (prijsVerschil * 0.2);
-
-const ladenOnderPrijs = laagstePrijs + CONFIG.prijsLadenVerschil;
-
-// ─── Validatie ────────────────────────────────────────────────────────────────
-if (isNaN(parseFloat(d.p1)) || isNaN(parseFloat(d.accu))) {
+// ─── Validatie Sensor Data ───────────────────────────────────────────────────
+if (isNaN(parseFloat(inputData.p1c)) && isNaN(parseFloat(inputData.p1))) {
     node.status({ fill: "red", shape: "ring", text: "Sensor data ontbreekt" });
     return null;
 }
 
-// ─── Basisberekeningen ────────────────────────────────────────────────────────
-let huisverbruik = Math.round(Math.abs(p1 + accu + pv));
-let doelSetpoint = Math.round(p1 + accu - nopdemeter);
+// ─── Datatransformatie & Sensorwaarden ───────────────────────────────────────
+const p1Vermogen = Number((inputData.p1c * 1000) - (inputData.p1p * 1000)); // + = afname, - = teruglevering
+const accuVermogen = -Number(inputData.accu);                               // + = ontladen, - = laden
+const pvVermogen = Number(inputData.pv);                                     // PV opbrengst in Watt
+const soc = Number(inputData.soc);                                           // Accu SOC in %
+const meterDoel = Number(inputData.target);                                  // Gewenst vermogen op de P1-meter (meestal 0)
+
+// Dynamische tarieven (€/kWh)
+const huidigePrijs = Number(inputData.prijs);
+const laagstePrijs = Number(inputData.laagsteprijs);
+const hoogstePrijs = Number(inputData.hoogsteprijs);
+
+// Handmatige schakelaars
+const forceerLaden = inputData.force_charge === "on";
+const forceerOntladen = inputData.force_discharge === "on";
+
+// ─── Financiële Berekeningen ─────────────────────────────────────────────────
+const prijsVerschil = hoogstePrijs - laagstePrijs;
+
+// Minimale verkoopprijs waarbij ontladen van ingekochte stroom rendabel is
+const breakEvenOntlaadPrijs = (laagstePrijs / CONFIG.accuEfficiency) + CONFIG.degradatieKosten;
+
+// ─── Basis Berekeningen ──────────────────────────────────────────────────────
+const huisVerbruik = Math.round(Math.abs(p1Vermogen + accuVermogen + pvVermogen));
+let doelSetpoint = Math.round(p1Vermogen + accuVermogen - meterDoel);
 let reden = "";
 let stop = false;
 
-// Initieel setpoint op basis van meterbalans
+// ─── 1. Standaard Balanssturing (PV Overschot & Eigen Verbruik) ───────────────
 if (doelSetpoint < 0) {
-    if (CONFIG.PVLaden || prijsVerschil < CONFIG.prijsLadenMinVerschil && doelSetpoint <= -75) {
+    if (CONFIG.ladenOpPvOverschot) {
         reden = `Laden op PV-overschot (${Math.abs(doelSetpoint)} W)`;
     } else {
         doelSetpoint = 0;
-        reden = "PV-overschot, voorkeur terugleveren";
+        reden = "PV-overschot, voorkeur voor teruglevering";
     }
 } else if (doelSetpoint > 0) {
-    reden = `Ontladen ${doelSetpoint} W`;
+    reden = `Eigen verbruik dekken (${doelSetpoint} W)`;
 }
 
-// ─── Handmatig forceren ───────────────────────────────────────────────────────
-if (forceerLaden && soc < CONFIG.forceChargeMaxCharge) {
-    doelSetpoint = CONFIG.maxCharge;
-    reden = "Handmatig laden";
-} else if (forceerOntladen && soc > CONFIG.forceDischargeMinSoc) {
-    doelSetpoint = CONFIG.maxDischarge;
-    reden = "Handmatig ontladen";
+// ─── 2. Handmatige Overrules ─────────────────────────────────────────────────
+if (forceerLaden && soc < CONFIG.forceerLadenMaxSoc) {
+    doelSetpoint = CONFIG.maxLaadVermogen;
+    reden = "Handmatig laden geforceerd";
+} else if (forceerOntladen && soc > CONFIG.forceerOntladenMinSoc) {
+    doelSetpoint = CONFIG.maxOntlaadVermogen;
+    reden = "Handmatig ontladen geforceerd";
 
-    // ─── Prijssturing ─────────────────────────────────────────────────────────────
-} else {
+// ─── 3. Dynamische Prijssturing (Arbitrage) ─────────────────────────
+} else if (CONFIG.prijsSturingActief) {
 
-    // --- Negatieve prijzen ---
+    // A. Negatieve prijzen: Maak optimaal gebruik van geld toe krijgen op stroom opname
     if (huidigePrijs < 0) {
-        if (huidigePrijs !== laagstePrijs) {
-            // Goedkoper dan 0 maar niet de absolute laagste: schaal vermogen naar afstand
-            const verschilNegPrijs = Math.abs(huidigePrijs - laagstePrijs);
-            const band = CONFIG.negPrijsBanden.find(b => verschilNegPrijs < b.maxVerschil);
-            doelSetpoint = band.vermogen;
-            reden = `Prijs negatief (€${huidigePrijs.toFixed(4)}/kWh), laden op ${Math.abs(doelSetpoint)} W`;
+        if (huidigePrijs === laagstePrijs) {
+            doelSetpoint = CONFIG.maxLaadVermogen;
+            reden = `Laagste prijs is negatief (€${huidigePrijs.toFixed(4)}), maximaal laden`;
         } else {
-            doelSetpoint = CONFIG.maxCharge;
-            reden = `Laagste prijs van de dag negatief (€${huidigePrijs.toFixed(4)}/kWh), max laden`;
+            const verschilMetLaagste = Math.abs(huidigePrijs - laagstePrijs);
+            const band = CONFIG.negatievePrijsBanden.find(b => verschilMetLaagste <= b.maxVerschil);
+            doelSetpoint = band ? band.vermogen : CONFIG.maxLaadVermogen;
+            reden = `Negatieve prijs (€${huidigePrijs.toFixed(4)}), laden op ${Math.abs(doelSetpoint)} W`;
         }
 
-        // --- Hoogste prijs: ontladen als spread groot genoeg en SoC voldoende ---
+    // B. Hoogste uur van de dag: Maximaal ontladen naar het net als de spread groot genoeg is
     } else if (
         huidigePrijs === hoogstePrijs &&
-        prijsVerschil >= CONFIG.minSpreadOntladen &&  // FIX: geen ontladen bij kleine spread
+        prijsVerschil >= CONFIG.minPrijsSpreadOntladen &&
         soc > CONFIG.minSocPrijsOntladen
     ) {
-        doelSetpoint = CONFIG.maxDischarge;
-        reden = `Hoogste prijs (€${huidigePrijs.toFixed(4)}/kWh), spread €${prijsVerschil.toFixed(3)}, SoC ${soc}% — ontladen`;
+        doelSetpoint = CONFIG.maxOntlaadVermogen;
+        reden = `Piek-uur (€${huidigePrijs.toFixed(4)}), spread €${prijsVerschil.toFixed(3)} — max ontladen naar net`;
 
-        // --- Goedkoopste uur: vol laden ---
-    } else if (huidigePrijs === laagstePrijs && prijsVerschil >= CONFIG.prijsLadenMinVerschil) {
-        if (huisverbruik >= 2500) {
-            doelSetpoint = -500;
-        } else {
-            doelSetpoint = CONFIG.maxCharge;
-        }
-        reden = `Goedkoopste uur (€${huidigePrijs.toFixed(4)}/kWh), spread €${prijsVerschil.toFixed(3)}`;
+    // C. Goedkoopste uur van de dag: Snel volladen tegen het laagste tarief
+    } else if (
+        huidigePrijs === laagstePrijs &&
+        prijsVerschil >= CONFIG.minPrijsSpreadLaden &&
+        soc < CONFIG.maxSoc
+    ) {
+        doelSetpoint = CONFIG.maxLaadVermogen;
+        reden = `Goedkoopste uur van de dag (€${huidigePrijs.toFixed(4)}), maximaal laden`;
 
-        // --- Prijs laag genoeg om bij te laden (hysterese) ---
-    } else if (huidigePrijs <= ladenOnderPrijs && prijsVerschil >= CONFIG.prijsLadenMinVerschil && CONFIG.prijsLaden) {
-        let prijsLadenActief = context.get('prijsLadenActief') || false;
-
-        // Hysterese: start onder minSOC, stop boven maxCharge (FIX: maxCharge bestond niet)
-        if (!prijsLadenActief && soc < CONFIG.prijsLadenMinSOC) {
-            prijsLadenActief = true;
-            context.set('prijsLadenActief', true);
-        } else if (prijsLadenActief && soc >= CONFIG.prijsLadenMaxCharge) {
-            prijsLadenActief = false;
-            context.set('prijsLadenActief', false);
-        }
-
-        if (prijsLadenActief) {
-            let tmpVermogenReken = ((1 - huidigePrijs) / 2) * CONFIG.prijsLadenVerschilVermogen;
-            let pvMinVerbruik = (pv - p1);
-            let vermogenMinPV = Math.max(tmpVermogenReken, -pvMinVerbruik);
-
-            let min300watt = Math.min(-300, vermogenMinPV);
-
-            doelSetpoint = Math.min(-300, (Math.max((((1 - huidigePrijs) / 2) * CONFIG.prijsLadenVerschilVermogen), -pv)));
-            // doelSetpoint = min300watt;
-            reden = `Prijsgestuurde bijlading (€${huidigePrijs.toFixed(4)}/kWh), SoC ${soc}%`;
-        }
-    }
-
-    // --- Deadband: geen actie als verschil te klein ---
-    const deadbandVerschil = Math.round(Math.abs(accu - doelSetpoint));
-    if (deadbandVerschil < CONFIG.deadband && soc > CONFIG.minSOC && soc < CONFIG.maxSOC) {
-        stop = true;
-    }
-
-    // --- Ontlaadsterkte te laag: negeren ---
-    if (doelSetpoint > 0 && doelSetpoint < 50 && pv < 200) {
-        reden = "Ontlaadsterkte te laag, negeren";
-        doelSetpoint = 0;
-    }
-
-    if (huidigePrijs < prijsHoogteOntladen2 && doelSetpoint > 0) {
-        reden = `Prijs te laag om te ontladen.`
-        doelSetpoint = 0;
-    }
-
-    // --- Prijs te laag om te ontladen (buffer beschermen) ---
-    if (soc < CONFIG.socBuffer && huidigePrijs < prijsHoogteOntladen && doelSetpoint > 0) {
-        reden = `Prijs €${huidigePrijs.toFixed(4)} < drempel €${prijsHoogteOntladen.toFixed(4)}, buffer (${CONFIG.socBuffer}%) beschermen`;
-        doelSetpoint = 0;
-    }
-
-    // --- Vandaag negatieve prijzen: niet laden op overschot als prijs positief ---
-    if (laagstePrijs < 0 && doelSetpoint < 0 && huidigePrijs > 0) {
-        reden = `Dag heeft negatieve prijs (laagste €${laagstePrijs.toFixed(4)}), laden bewaren voor dat moment`;
-        doelSetpoint = 0;
+    // D. Voordelige uren: Bijladen uit het net wanneer prijs dicht bij het dagdieptepunt ligt
+    } else if (
+        huidigePrijs <= (laagstePrijs + CONFIG.prijsLadenVerschil) &&
+        prijsVerschil >= CONFIG.minPrijsSpreadLaden &&
+        soc < CONFIG.maxSoc
+    ) {
+        doelSetpoint = CONFIG.maxLaadVermogen;
+        reden = `Voordelig tarief (€${huidigePrijs.toFixed(4)}), bijladen uit het net`;
     }
 }
 
-// ─── SoC-grenzen ─────────────────────────────────────────────────────────────
-if (soc >= CONFIG.maxSOC && doelSetpoint < 0) {
-    reden = `Accu vol (${soc}%)`;
+// ─── 4. Rendementscontroles & Accubescherming ────────────────────────────────
+
+// Ontladen blokkeren als de acculading onder de buffer komt en de prijs niet boven break-even ligt
+if (doelSetpoint > 0 && soc <= CONFIG.socBuffer) {
+    if (huidigePrijs < breakEvenOntlaadPrijs) {
+        doelSetpoint = 0;
+        reden = `Bufferbescherming (${CONFIG.socBuffer}% SOC): prijs €${huidigePrijs.toFixed(3)} onder break-even €${breakEvenOntlaadPrijs.toFixed(3)}`;
+    }
+}
+
+// Kleine vermogens negeren i.v.m. omvormer-efficiëntieverliezen
+if (doelSetpoint < 0 && doelSetpoint > CONFIG.minLaadVermogenDrempel) {
     doelSetpoint = 0;
+    reden = "Laadvermogen te laag voor efficiënt rendement";
 }
-if (soc <= CONFIG.minSOC && doelSetpoint > 0) {
-    reden = `Accu leeg (${soc}%)`;
+if (doelSetpoint > 0 && doelSetpoint < CONFIG.minOntlaadVermogenDrempel && pvVermogen < 200) {
     doelSetpoint = 0;
+    reden = "Ontlaadvermogen te laag voor efficiënt rendement";
 }
 
-// Efficientie
-if (doelSetpoint < 0 && doelSetpoint > -100) {
-    reden = `Te kleine lading, voorkeur terugleveren vanwege accu efficientie`
+// Harde SOC grenzen bewaken
+if (soc >= CONFIG.maxSoc && doelSetpoint < 0) {
     doelSetpoint = 0;
+    reden = `Accu is vol (${soc}%)`;
+}
+if (soc <= CONFIG.minSoc && doelSetpoint > 0) {
+    doelSetpoint = 0;
+    reden = `Accu is leeg (${soc}%)`;
 }
 
-// ─── Clamp naar limieten ─────────────────────────────────────────────────────
-doelSetpoint = Math.max(CONFIG.maxCharge, Math.min(CONFIG.maxDischarge, doelSetpoint));
+// ─── 5. Deadband Controle ───────────────────────────────────────────────────
+const vermogensVerschil = Math.abs(accuVermogen - doelSetpoint);
+if (vermogensVerschil < CONFIG.deadband && soc > CONFIG.minSoc && soc < CONFIG.maxSoc) {
+    stop = true;
+}
 
-// ─── Ramp-up: stap vanuit huidig accuvermogen richting doel ──────────────────
+// ─── 6. Vermogenslimieten Clampen ───────────────────────────────────────────
+doelSetpoint = Math.max(CONFIG.maxLaadVermogen, Math.min(CONFIG.maxOntlaadVermogen, doelSetpoint));
+
+// ─── 7. Ramp-Up (Geleidelijke Vermogensopbouw) ──────────────────────────────
 let setpoint;
 if (!stop) {
-    if (doelSetpoint > accu) {
-        setpoint = Math.min(doelSetpoint, accu + CONFIG.rampUp);
-    } else if (doelSetpoint < accu) {
-        setpoint = Math.max(doelSetpoint, accu - CONFIG.rampUp);
+    if (doelSetpoint > accuVermogen) {
+        setpoint = Math.min(doelSetpoint, accuVermogen + CONFIG.rampUpStap);
+    } else if (doelSetpoint < accuVermogen) {
+        setpoint = Math.max(doelSetpoint, accuVermogen - CONFIG.rampUpStap);
     } else {
         setpoint = doelSetpoint;
     }
 
     if (setpoint < 0) reden = reden || `Accu laden (${setpoint} W)`;
     else if (setpoint > 0) reden = reden || `Accu ontladen (${setpoint} W)`;
-    else reden = reden || "Balans";
+    else reden = reden || "Balans bereikt";
 
     if (setpoint !== doelSetpoint) {
-        reden += ` [ramp: ${Math.round(accu)}→${Math.round(setpoint)} (doel: ${doelSetpoint})]`;
+        reden += ` [ramp: ${Math.round(accuVermogen)}→${Math.round(setpoint)} W (doel: ${doelSetpoint} W)]`;
     }
 } else {
-    setpoint = accu; // Geen stuur nodig, houd huidige stand
+    setpoint = accuVermogen;
 }
 
-// Stop ook als accu al stilstaat en setpoint nul is
-if (setpoint === 0 && accu <= 10 && accu >= -10) {
+// Geen actie nodig als de accu stilstaat en het doel nul is
+if (setpoint === 0 && Math.abs(accuVermogen) <= 10) {
     stop = true;
 }
 
-// ─── Status ──────────────────────────────────────────────────────────────────
-const kleur = setpoint > 0 ? "green" : setpoint < 0 ? "blue" : "grey";
+// ─── 8. Node Status & Output ────────────────────────────────────────────────
+const statusKleur = setpoint > 0 ? "green" : setpoint < 0 ? "blue" : "grey";
 node.status({
-    fill: kleur,
+    fill: statusKleur,
     shape: "dot",
-    text: `Huis: ${huisverbruik} W | P1: ${Math.round(p1)} W | Accu: ${Math.round(accu)} W | SoC: ${soc}% | → ${setpoint} W (${reden}) | laagste: €${laagstePrijs} | huidig: €${huidigePrijs} | PV: ${pv} W | Ontlaadprijs: ${prijsHoogteOntladen}`
+    text: `Huis: ${huisVerbruik}W | P1: ${Math.round(p1Vermogen)}W | Accu: ${Math.round(accuVermogen)}W | SOC: ${soc}% | → ${setpoint}W (${reden})`
 });
 
-// ─── Uitvoer ──────────────────────────────────────────────────────────────────
 const msgPayload = {
     payload2: {
         data: {
