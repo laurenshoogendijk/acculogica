@@ -1,5 +1,7 @@
 # Acculogica
 
+[![CI](https://github.com/laurenshoogendijk/acculogica/actions/workflows/test.yml/badge.svg)](https://github.com/laurenshoogendijk/acculogica/actions/workflows/test.yml)
+
 Deze controller stuurt een thuisbatterij op basis van een combinatie van:
 
 - eigen verbruik en PV-overschot
