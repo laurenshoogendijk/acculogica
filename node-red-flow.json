@@ -1,8 +1,8 @@
 [
     {
-        "id": "group_placeholder",
+        "id": "id_1",
         "type": "group",
-        "z": "flow_placeholder",
+        "z": "z_2",
         "style": {
             "stroke": "#999999",
             "stroke-opacity": "1",
@@ -40,7 +40,7 @@
         "h": 402
     },
     {
-        "id": "subflow_placeholder",
+        "id": "id_3",
         "type": "subflow",
         "name": "Marstek Data Collector",
         "info": "Haalt alle relevante Home Assistant entiteiten op voor de Marstek berekening.",
@@ -51,7 +51,7 @@
                 "y": 140,
                 "wires": [
                     {
-                        "id": "node_placeholder_20"
+                        "id": "id_4"
                     }
                 ]
             }
@@ -62,7 +62,7 @@
                 "y": 680,
                 "wires": [
                     {
-                        "id": "node_placeholder_26",
+                        "id": "id_5",
                         "port": 0
                     }
                 ]
@@ -76,16 +76,16 @@
             "y": 740,
             "wires": [
                 {
-                    "id": "node_placeholder_26",
+                    "id": "id_5",
                     "port": 0
                 }
             ]
         }
     },
     {
-        "id": "node_placeholder_20",
+        "id": "id_4",
         "type": "api-current-state",
-        "z": "subflow_placeholder",
+        "z": "id_3",
         "name": "P1",
         "server": "ha_server_placeholder",
         "version": 3,
@@ -113,9 +113,9 @@
         ]
     },
     {
-        "id": "node_placeholder_21",
+        "id": "id_6",
         "type": "api-current-state",
-        "z": "subflow_placeholder",
+        "z": "id_3",
         "name": "SOC",
         "server": "ha_server_placeholder",
         "version": 3,
@@ -143,9 +143,9 @@
         ]
     },
     {
-        "id": "node_placeholder_22",
+        "id": "id_7",
         "type": "api-current-state",
-        "z": "subflow_placeholder",
+        "z": "id_3",
         "name": "Accu W",
         "server": "ha_server_placeholder",
         "version": 3,
@@ -175,9 +175,9 @@
         ]
     },
     {
-        "id": "node_placeholder_23",
+        "id": "id_8",
         "type": "api-current-state",
-        "z": "subflow_placeholder",
+        "z": "id_3",
         "name": "Force?",
         "server": "ha_server_placeholder",
         "version": 3,
@@ -205,9 +205,9 @@
         ]
     },
     {
-        "id": "node_placeholder_24",
+        "id": "id_9",
         "type": "api-current-state",
-        "z": "subflow_placeholder",
+        "z": "id_3",
         "name": "Target",
         "server": "ha_server_placeholder",
         "version": 3,
@@ -235,9 +235,9 @@
         ]
     },
     {
-        "id": "node_placeholder_25",
+        "id": "id_10",
         "type": "api-current-state",
-        "z": "subflow_placeholder",
+        "z": "id_3",
         "name": "Stroomprijs",
         "server": "ha_server_placeholder",
         "version": 3,
@@ -267,9 +267,9 @@
         ]
     },
     {
-        "id": "node_placeholder_26",
+        "id": "id_5",
         "type": "function",
-        "z": "subflow_placeholder",
+        "z": "id_3",
         "name": "function 1",
         "func": "const kleur = \"green\";\nmsg.payload = { \n    fill: kleur, \n    shape: \"dot\", \n    text: `P1: ${msg.data.p1}, Accu SoC: ${msg.data.soc}, Accu Vermogen: ${msg.data.accu}, Prijs: ${msg.data.prijs}, Laagste prijs: ${msg.data.laagsteprijs}`\n};\n\nreturn msg;",
         "outputs": 1,
@@ -285,9 +285,9 @@
         ]
     },
     {
-        "id": "node_placeholder_27",
+        "id": "id_11",
         "type": "api-current-state",
-        "z": "subflow_placeholder",
+        "z": "id_3",
         "name": "Laden op prijs",
         "server": "ha_server_placeholder",
         "version": 3,
@@ -318,9 +318,9 @@
         ]
     },
     {
-        "id": "node_placeholder_28",
+        "id": "id_12",
         "type": "api-current-state",
-        "z": "subflow_placeholder",
+        "z": "id_3",
         "name": "Laagste prijs",
         "server": "ha_server_placeholder",
         "version": 3,
@@ -350,9 +350,9 @@
         ]
     },
     {
-        "id": "node_placeholder_29",
+        "id": "id_13",
         "type": "api-current-state",
-        "z": "subflow_placeholder",
+        "z": "id_3",
         "name": "Stroomprijs",
         "server": "ha_server_placeholder",
         "version": 3,
@@ -382,9 +382,9 @@
         ]
     },
     {
-        "id": "node_placeholder_30",
+        "id": "id_14",
         "type": "api-current-state",
-        "z": "subflow_placeholder",
+        "z": "id_3",
         "name": "Laagste prijs tijd",
         "server": "ha_server_placeholder",
         "version": 3,
@@ -414,9 +414,9 @@
         ]
     },
     {
-        "id": "node_placeholder_31",
+        "id": "id_15",
         "type": "api-current-state",
-        "z": "subflow_placeholder",
+        "z": "id_3",
         "name": "PV",
         "server": "ha_server_placeholder",
         "version": 3,
@@ -446,9 +446,9 @@
         ]
     },
     {
-        "id": "node_placeholder_32",
+        "id": "id_16",
         "type": "api-current-state",
-        "z": "subflow_placeholder",
+        "z": "id_3",
         "name": "Force?",
         "server": "ha_server_placeholder",
         "version": 3,
@@ -478,9 +478,9 @@
         ]
     },
     {
-        "id": "node_placeholder_33",
+        "id": "id_17",
         "type": "api-current-state",
-        "z": "subflow_placeholder",
+        "z": "id_3",
         "name": "P1 afname",
         "server": "ha_server_placeholder",
         "version": 3,
@@ -510,9 +510,9 @@
         ]
     },
     {
-        "id": "node_placeholder_34",
+        "id": "id_18",
         "type": "api-current-state",
-        "z": "subflow_placeholder",
+        "z": "id_3",
         "name": "P1 levering",
         "server": "ha_server_placeholder",
         "version": 3,
@@ -542,9 +542,9 @@
         ]
     },
     {
-        "id": "node_placeholder_1",
+        "id": "id_19",
         "type": "api-current-state",
-        "z": "flow_placeholder",
+        "z": "z_2",
         "g": "group_placeholder",
         "name": "Automatische regeling ingeschakeld?",
         "server": "ha_server_placeholder",
@@ -588,9 +588,9 @@
         ]
     },
     {
-        "id": "cd2c8c7a53d682a6",
+        "id": "id_20",
         "type": "server-state-changed",
-        "z": "flow_placeholder",
+        "z": "z_2",
         "g": "group_placeholder",
         "name": "P1 Meter Wijzigt",
         "server": "ha_server_placeholder",
@@ -642,9 +642,9 @@
         ]
     },
     {
-        "id": "node_placeholder_2",
+        "id": "id_21",
         "type": "subflow:subflow_placeholder",
-        "z": "flow_placeholder",
+        "z": "z_2",
         "g": "group_placeholder",
         "name": "Haal alle Data op",
         "x": 150,
@@ -656,9 +656,9 @@
         ]
     },
     {
-        "id": "node_placeholder_3",
+        "id": "id_22",
         "type": "function",
-        "z": "flow_placeholder",
+        "z": "z_2",
         "g": "group_placeholder",
         "name": "Bereken setpoint",
         "func": "// ─── Configuratie ────────────────────────────────────────────────────────────\nconst CONFIG = {\n    deviceId: \"device_id_placeholder\",\n\n    // Vermogensgrenzen (Watt)\n    maxLaadVermogen: -2500,          // W (negatief = laden uit het net/PV)\n    maxOntlaadVermogen: 1250,        // W (positief = ontladen naar huis/net)\n    minLaadVermogenDrempel: -100,    // W, negeer te kleine laadacties i.v.m. rendement\n    minOntlaadVermogenDrempel: 50,   // W, negeer te kleine ontlaadacties\n\n    // Accucapaciteit en limieten (%)\n    minSoc: 12,                      // % minimale accucapaciteit (ondergrens)\n    maxSoc: 100,                     // % maximale accucapaciteit (bovengrens)\n    socBuffer: 20,                   // % reserve voor de absolute piekuren\n\n    // Besturing & Snelheid\n    deadband: 15,                    // W, negeer kleine vermogensschommelingen\n    rampUpStap: 350,                 // W per cyclus voor geleidelijke vermogensopbouw\n\n    // Zonne-energie\n    ladenOpPvOverschot: true,        // true = PV-overschot opslaan in accu\n\n    // Handmatig forceren\n    forceerLadenMaxSoc: 90,          // Stop geforceerd laden boven dit SOC %\n    forceerOntladenMinSoc: 25,       // Stop geforceerd ontladen onder dit SOC %\n\n    // Dynamische Prijssturing (Arbitrage)\n    prijsSturingActief: true,        // Activeer slim laden/ontladen op dynamische uurprijzen\n    minPrijsSpreadOntladen: 0.12,    // €/kWh minimale dagspread voor piek-ontladen naar net\n    minPrijsSpreadLaden: 0.08,       // €/kWh minimale dagspread om netladen te activeren\n    prijsLadenVerschil: 0.04,        // €/kWh boven laagste prijs om nog bij te laden\n    minSocPrijsOntladen: 60,         // % minimale SOC vereist om te ontladen naar net op piekuur\n\n    // Rendement & Slijtage\n    accuEfficiency: 0.85,            // RTE(Roundtrip efficiency) (bijv. 85%)\n    degradatieKosten: 0.02,          // €/kWh slijtagekosten per kWh\n\n    // Negatieve prijsbanden (€/kWh verschil t.o.v. de absolute laagste dagprijs)\n    negatievePrijsBanden: [\n        { maxVerschil: 0.05, vermogen: -2500 },\n        { maxVerschil: 0.10, vermogen: -2000 },\n        { maxVerschil: 0.25, vermogen: -1500 },\n        { maxVerschil: Infinity, vermogen: -1000 }\n    ]\n};\n// ─────────────────────────────────────────────────────────────────────────────\n\nconst inputData = msg.data;\n\n// ─── Validatie Sensor Data ───────────────────────────────────────────────────\nif (isNaN(parseFloat(inputData.p1c)) && isNaN(parseFloat(inputData.p1))) {\n    node.status({ fill: \"red\", shape: \"ring\", text: \"Sensor data ontbreekt\" });\n    return null;\n}\n\n// ─── Datatransformatie & Sensorwaarden ───────────────────────────────────────\nconst p1Vermogen = Number((inputData.p1c * 1000) - (inputData.p1p * 1000)); // + = afname, - = teruglevering\nconst accuVermogen = -Number(inputData.accu);                               // + = ontladen, - = laden\nconst pvVermogen = Number(inputData.pv);                                     // PV opbrengst in Watt\nconst soc = Number(inputData.soc);                                           // Accu SOC in %\nconst meterDoel = Number(inputData.target);                                  // Gewenst vermogen op de P1-meter (meestal 0)\n\n// Dynamische tarieven (€/kWh)\nconst huidigePrijs = Number(inputData.prijs);\nconst laagstePrijs = Number(inputData.laagsteprijs);\nconst hoogstePrijs = Number(inputData.hoogsteprijs);\n\n// Handmatige schakelaars\nconst forceerLaden = inputData.force_charge === \"on\";\nconst forceerOntladen = inputData.force_discharge === \"on\";\n\n// ─── Financiële Berekeningen ─────────────────────────────────────────────────\nconst prijsVerschil = hoogstePrijs - laagstePrijs;\n\n// Minimale verkoopprijs waarbij ontladen van ingekochte stroom rendabel is\nconst breakEvenOntlaadPrijs = (laagstePrijs / CONFIG.accuEfficiency) + CONFIG.degradatieKosten;\n\n// ─── Basis Berekeningen ──────────────────────────────────────────────────────\nconst huisVerbruik = Math.round(Math.abs(p1Vermogen + accuVermogen + pvVermogen));\nlet doelSetpoint = Math.round(p1Vermogen + accuVermogen - meterDoel);\nlet reden = \"\";\nlet stop = false;\n\n// ─── 1. Standaard Balanssturing (PV Overschot & Eigen Verbruik) ───────────────\nif (doelSetpoint < 0) {\n    if (CONFIG.ladenOpPvOverschot) {\n        reden = `Laden op PV-overschot (${Math.abs(doelSetpoint)} W)`;\n    } else {\n        doelSetpoint = 0;\n        reden = \"PV-overschot, voorkeur voor teruglevering\";\n    }\n} else if (doelSetpoint > 0) {\n    reden = `Eigen verbruik dekken (${doelSetpoint} W)`;\n}\n\n// ─── 2. Handmatige Overrules ─────────────────────────────────────────────────\nif (forceerLaden && soc < CONFIG.forceerLadenMaxSoc) {\n    doelSetpoint = CONFIG.maxLaadVermogen;\n    reden = \"Handmatig laden geforceerd\";\n} else if (forceerOntladen && soc > CONFIG.forceerOntladenMinSoc) {\n    doelSetpoint = CONFIG.maxOntlaadVermogen;\n    reden = \"Handmatig ontladen geforceerd\";\n\n// ─── 3. Dynamische Prijssturing (Arbitrage) ──────────────────────────────────\n} else if (CONFIG.prijsSturingActief) {\n\n    // A. Negatieve prijzen: Maak optimaal gebruik van geld toe krijgen op stroom opname\n    if (huidigePrijs < 0) {\n        if (huidigePrijs === laagstePrijs) {\n            doelSetpoint = CONFIG.maxLaadVermogen;\n            reden = `Laagste prijs is negatief (€${huidigePrijs.toFixed(4)}), maximaal laden`;\n        } else {\n            const verschilMetLaagste = Math.abs(huidigePrijs - laagstePrijs);\n            const band = CONFIG.negatievePrijsBanden.find(b => verschilMetLaagste <= b.maxVerschil);\n            doelSetpoint = band ? band.vermogen : CONFIG.maxLaadVermogen;\n            reden = `Negatieve prijs (€${huidigePrijs.toFixed(4)}), laden op ${Math.abs(doelSetpoint)} W`;\n        }\n\n    // B. Hoogste uur van de dag: Maximaal ontladen naar het net als de spread groot genoeg is\n    } else if (\n        huidigePrijs >= (hoogstePrijs - 0.03) && // Prijs zit maximaal €0,03 onder de dagtop\n        // huidigePrijs === hoogstePrijs && // Prijs is hoogste van de dag\n        prijsVerschil >= CONFIG.minPrijsSpreadOntladen &&\n        soc > CONFIG.minSocPrijsOntladen\n    ) {\n        doelSetpoint = CONFIG.maxOntlaadVermogen;\n        reden = `Piek-uur (€${huidigePrijs.toFixed(4)}), spread €${prijsVerschil.toFixed(3)} — max ontladen naar net`;\n\n    // C. Goedkoopste uur van de dag: Snel volladen tegen het laagste tarief\n    } else if (\n        huidigePrijs === laagstePrijs &&\n        prijsVerschil >= CONFIG.minPrijsSpreadLaden &&\n        soc < CONFIG.maxSoc\n    ) {\n        doelSetpoint = CONFIG.maxLaadVermogen;\n        reden = `Goedkoopste uur van de dag (€${huidigePrijs.toFixed(4)}), maximaal laden`;\n\n    // D. Voordelige uren: Bijladen uit het net wanneer prijs dicht bij het dagdieptepunt ligt\n    } else if (\n        huidigePrijs <= (laagstePrijs + CONFIG.prijsLadenVerschil) &&\n        prijsVerschil >= CONFIG.minPrijsSpreadLaden &&\n        soc < CONFIG.maxSoc\n    ) {\n        doelSetpoint = CONFIG.maxLaadVermogen;\n        reden = `Voordelig tarief (€${huidigePrijs.toFixed(4)}), bijladen uit het net`;\n    }\n}\n\n// ─── 4. Rendementscontroles & Accubescherming ────────────────────────────────\n\n// Blokkeer ontladen als de netprijs lager is dan de break-even ontlaadprijs van de accu.\n// Het is op dat moment goedkoper om stroom direct van het net te kopen dan de accu aan te spreken.\nif (doelSetpoint > 0 && huidigePrijs < breakEvenOntlaadPrijs) {\n    doelSetpoint = 0;\n    reden = `Ontladen geblokkeerd: netprijs (€${huidigePrijs.toFixed(3)}) is goedkoper dan accustroom (break-even €${breakEvenOntlaadPrijs.toFixed(3)})`;\n}\n\n// Kleine vermogens negeren i.v.m. omvormer-efficiëntieverliezen\nif (doelSetpoint < 0 && doelSetpoint > CONFIG.minLaadVermogenDrempel) {\n    doelSetpoint = 0;\n    reden = \"Laadvermogen te laag voor efficiënt rendement\";\n}\nif (doelSetpoint > 0 && doelSetpoint < CONFIG.minOntlaadVermogenDrempel && pvVermogen < 200) {\n    doelSetpoint = 0;\n    reden = \"Ontlaadvermogen te laag voor efficiënt rendement\";\n}\n\n// Harde SOC grenzen bewaken\nif (soc >= CONFIG.maxSoc && doelSetpoint < 0) {\n    doelSetpoint = 0;\n    reden = `Accu is vol (${soc}%)`;\n}\nif (soc <= CONFIG.minSoc && doelSetpoint > 0) {\n    doelSetpoint = 0;\n    reden = `Accu is leeg (${soc}%)`;\n}\n\n// ─── 5. Deadband Controle ───────────────────────────────────────────────────\nconst vermogensVerschil = Math.abs(accuVermogen - doelSetpoint);\nif (vermogensVerschil < CONFIG.deadband && soc > CONFIG.minSoc && soc < CONFIG.maxSoc) {\n    stop = true;\n}\n\n// ─── 6. Vermogenslimieten Clampen ───────────────────────────────────────────\ndoelSetpoint = Math.max(CONFIG.maxLaadVermogen, Math.min(CONFIG.maxOntlaadVermogen, doelSetpoint));\n\n// ─── 7. Ramp-Up (Geleidelijke Vermogensopbouw) ──────────────────────────────\nlet setpoint;\nif (!stop) {\n    if (doelSetpoint > accuVermogen) {\n        setpoint = Math.min(doelSetpoint, accuVermogen + CONFIG.rampUpStap);\n    } else if (doelSetpoint < accuVermogen) {\n        setpoint = Math.max(doelSetpoint, accuVermogen - CONFIG.rampUpStap);\n    } else {\n        setpoint = doelSetpoint;\n    }\n\n    if (setpoint < 0) reden = reden || `Accu laden (${setpoint} W)`;\n    else if (setpoint > 0) reden = reden || `Accu ontladen (${setpoint} W)`;\n    else reden = reden || \"Balans bereikt\";\n\n    if (setpoint !== doelSetpoint) {\n        reden += ` [ramp: ${Math.round(accuVermogen)}→${Math.round(setpoint)} W (doel: ${doelSetpoint} W)]`;\n    }\n} else {\n    setpoint = accuVermogen;\n}\n\n// Geen actie nodig als de accu stilstaat en het doel nul is\nif (setpoint === 0 && Math.abs(accuVermogen) <= 10) {\n    stop = true;\n}\n\n// ─── 8. Node Status & Output ────────────────────────────────────────────────\nconst statusKleur = setpoint > 0 ? \"green\" : setpoint < 0 ? \"blue\" : \"grey\";\nnode.status({\n    fill: statusKleur,\n    shape: \"dot\",\n    text: `Huis: ${huisVerbruik}W | P1: ${Math.round(p1Vermogen)}W | Accu: ${Math.round(accuVermogen)}W | SOC: ${soc}% | → ${setpoint}W (${reden})`\n});\n\nconst msgPayload = {\n    payload2: {\n        data: {\n            device_id: CONFIG.deviceId,\n            time_num: 0,\n            start_time: \"00:00\",\n            end_time: \"23:59\",\n            days: [\"mon\", \"tue\", \"wed\", \"thu\", \"fri\", \"sat\", \"sun\"],\n            power: setpoint,\n        }\n    }\n};\n\nconst msgStatus = {\n    payload: { value: reden }\n};\n\nif (stop) {\n    return [null, msgStatus];\n} else {\n    return [msgPayload, msgStatus];\n}",
@@ -684,9 +684,9 @@
         ]
     },
     {
-        "id": "node_placeholder_4",
+        "id": "id_23",
         "type": "api-call-service",
-        "z": "flow_placeholder",
+        "z": "z_2",
         "g": "group_placeholder",
         "name": "",
         "server": "ha_server_placeholder",
@@ -716,9 +716,9 @@
         ]
     },
     {
-        "id": "node_placeholder_5",
+        "id": "id_24",
         "type": "api-call-service",
-        "z": "flow_placeholder",
+        "z": "z_2",
         "g": "group_placeholder",
         "name": "Marstek Update",
         "server": "ha_server_placeholder",
@@ -747,9 +747,9 @@
         ]
     },
     {
-        "id": "node_placeholder_6",
+        "id": "id_25",
         "type": "api-call-service",
-        "z": "flow_placeholder",
+        "z": "z_2",
         "g": "group_placeholder",
         "name": "",
         "server": "ha_server_placeholder",
@@ -781,9 +781,9 @@
         ]
     },
     {
-        "id": "node_placeholder_7",
+        "id": "id_26",
         "type": "api-call-service",
-        "z": "flow_placeholder",
+        "z": "z_2",
         "g": "group_placeholder",
         "name": "",
         "server": "ha_server_placeholder",
@@ -813,9 +813,9 @@
         ]
     },
     {
-        "id": "node_placeholder_8",
+        "id": "id_27",
         "type": "api-current-state",
-        "z": "flow_placeholder",
+        "z": "z_2",
         "g": "group_placeholder",
         "name": "Api call nog in progress?",
         "server": "ha_server_placeholder",
@@ -846,9 +846,9 @@
         ]
     },
     {
-        "id": "node_placeholder_9",
+        "id": "id_28",
         "type": "inject",
-        "z": "flow_placeholder",
+        "z": "z_2",
         "d": true,
         "g": "group_placeholder",
         "name": "On start",
@@ -877,9 +877,9 @@
         ]
     },
     {
-        "id": "node_placeholder_10",
+        "id": "id_29",
         "type": "api-call-service",
-        "z": "flow_placeholder",
+        "z": "z_2",
         "g": "group_placeholder",
         "name": "",
         "server": "ha_server_placeholder",
@@ -909,9 +909,9 @@
         ]
     },
     {
-        "id": "node_placeholder_11",
+        "id": "id_30",
         "type": "change",
-        "z": "flow_placeholder",
+        "z": "z_2",
         "g": "group_placeholder",
         "name": "",
         "rules": [
@@ -937,9 +937,9 @@
         ]
     },
     {
-        "id": "node_placeholder_12",
+        "id": "id_31",
         "type": "change",
-        "z": "flow_placeholder",
+        "z": "z_2",
         "g": "group_placeholder",
         "name": "",
         "rules": [
@@ -963,9 +963,9 @@
         ]
     },
     {
-        "id": "node_placeholder_13",
+        "id": "id_32",
         "type": "switch",
-        "z": "flow_placeholder",
+        "z": "z_2",
         "g": "group_placeholder",
         "name": "100% | ! 100%",
         "property": "payload",
@@ -997,9 +997,9 @@
         ]
     },
     {
-        "id": "node_placeholder_14",
+        "id": "id_33",
         "type": "api-current-state",
-        "z": "flow_placeholder",
+        "z": "z_2",
         "g": "group_placeholder",
         "name": "Accu SoC",
         "server": "ha_server_placeholder",
@@ -1042,9 +1042,9 @@
         ]
     },
     {
-        "id": "node_placeholder_15",
+        "id": "id_34",
         "type": "api-current-state",
-        "z": "flow_placeholder",
+        "z": "z_2",
         "g": "group_placeholder",
         "name": "Huisverbruik ophalen",
         "server": "ha_server_placeholder",
@@ -1087,9 +1087,9 @@
         ]
     },
     {
-        "id": "node_placeholder_16",
+        "id": "id_35",
         "type": "api-call-service",
-        "z": "flow_placeholder",
+        "z": "z_2",
         "g": "group_placeholder",
         "name": "",
         "server": "ha_server_placeholder",
@@ -1119,9 +1119,9 @@
         ]
     },
     {
-        "id": "node_placeholder_17",
+        "id": "id_36",
         "type": "function",
-        "z": "flow_placeholder",
+        "z": "z_2",
         "g": "group_placeholder",
         "name": "function 3",
         "func": "const p = Number(msg.payload);\n\nconst vermogen = p + 15;\n\nconst value = Math.min(vermogen, 800);\n\nconst newMsg = {\n    payload: {\n        value\n    }\n};\n\nreturn newMsg;",
@@ -1140,9 +1140,9 @@
         ]
     },
     {
-        "id": "node_placeholder_18",
+        "id": "id_37",
         "type": "api-call-service",
-        "z": "flow_placeholder",
+        "z": "z_2",
         "g": "group_placeholder",
         "name": "",
         "server": "ha_server_placeholder",
@@ -1172,9 +1172,9 @@
         ]
     },
     {
-        "id": "node_placeholder_19",
+        "id": "id_38",
         "type": "delay",
-        "z": "flow_placeholder",
+        "z": "z_2",
         "g": "group_placeholder",
         "name": "",
         "pauseType": "rate",
@@ -1198,7 +1198,7 @@
         ]
     },
     {
-        "id": "ha_server_placeholder",
+        "id": "id_39",
         "type": "server",
         "name": "Home Assistant",
         "version": 5,
@@ -1221,7 +1221,7 @@
         "enableGlobalContextStore": true
     },
     {
-        "id": "a78544804824acc8",
+        "id": "id_40",
         "type": "global-config",
         "env": [],
         "modules": {

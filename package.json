@@ -6,7 +6,8 @@
   "scripts": {
     "check": "node --check script.js",
     "demo": "node demo.js",
-    "start": "node demo.js"
+    "start": "node demo.js",
+    "test": "node --test"
   },
   "keywords": [
     "energy",
