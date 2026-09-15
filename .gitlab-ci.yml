@@ -1,0 +1,21 @@
+stages:
+  - test
+
+cache:
+  key:
+    files:
+      - package-lock.json
+      - package.json
+  paths:
+    - node_modules/
+    - .npm/
+
+node_test:
+  stage: test
+  image: node:20-alpine
+  script:
+    - npm install
+    - npm test
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
